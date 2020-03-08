@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Лабораторная работа №3</title>
+
+    <h:outputStylesheet library="css" name="style.css" />
+    <h:outputScript library="js" name="area.js" />
+</h:head>
+
+<h:body>
+    <div class="page-content">
+        <div class="header page-block">
+            <h1>Лабораторная работа №3</h1>
+
+            по дисциплине
+
+            <h2>Web-программирование</h2>
+
+            <div class="header-details">
+                <strong>Лысенко Иван Владимирович</strong><br />
+                <strong>Соколова Анастасия Денисовна</strong><br />
+                Группа: <strong>P3201</strong><br />
+                Вариант: <strong>20155</strong>
+            </div>
+        </div>
+
+        <div class="page-row">
+            <div class="area page-block">
+                <h:outputText id="areaHistory" value="#{queryBean.historyJson}" />
+
+                <canvas id="areaCanvas" width="400" height="400">Браузер не поддерживает элемент холста</canvas>
+
+                <h:form id="areaForm">
+                    <h:inputHidden id="areaXField" value="#{queryBean.x}" />
+                    <h:inputHidden id="areaYField" value="#{queryBean.y}" />
+                    <h:inputHidden id="areaRField" value="#{queryBean.r}" />
+
+                    <h:commandButton id="areaSubmitButton" action="#{queryBean.checkAction}" />
+                </h:form>
+            </div>
+
+            <div class="page-column">
+                <div style="margin-left: 2ch;">
+                    <div id="error" class="error page-block page-bottomGap"
+                         style="#{empty facesContext.messageList ? 'display: none;' : ''}">
+                        <h:messages layout="table" styleClass="error-table" />
+                    </div>
+
+                    <div class="form page-block">
+                        <h:form id="userForm">
+                            <div class="form-field page-bottomGap">
+                                <div class="form-fieldLabel">X: </div>
+
+                                <h:selectOneRadio styleClass="form-fieldElement form-fieldRadios" required="true"
+                                                  requiredMessage="Для получения результата необходимо выбрать параметр X"
+                                                  converterMessage="Не пытайтесь сломать выбор параметра X"
+                                                  value="#{queryBean.x}">
+                                    <f:selectItems value="#{queryBean.availableXes}" />
+                                </h:selectOneRadio>
+                            </div>
+
+                            <div class="form-field page-bottomGap">
+                                <div class="form-fieldLabel">Y: </div>
+
+                                <h:inputText styleClass="form-fieldElement" id="yField" required="true"
+                                             requiredMessage="Для получения результата необходимо ввести параметр Y"
+                                             converter="lab3.CommaDoubleConverter"
+                                             converterMessage="Y должен быть числом от -5 до 5 не включая границ"
+                                             validatorMessage="Y должен быть числом от -5 до 5 не включая границ"
+                                             validator="#{queryBean.yValidator}" value="#{queryBean.y}">
+                                    <f:validateDoubleRange minimum="#{queryBean.minAvailableY}"
+                                                           maximum="#{queryBean.maxAvailableY}" />
+                                </h:inputText>
+
+                                <p:watermark for="yField" value="(-5 ... 5)" />
+                            </div>
+
+                            <div class="form-field page-bottomGap">
+                                <div class="form-fieldLabel">R: </div>
+
+                                <p:spinner styleClass="form-fieldElement" stepFactor="#{queryBean.availableRStep}"
+                                           min="#{queryBean.minAvailableR}" max="#{queryBean.maxAvailableR}"
+                                           required="true" value="#{queryBean.r}" id="rField"
+                                           onchange="area.onRChanged(this.value);" />
+                            </div>
+
+                            <div class="form-field">
+                                <h:commandButton class="form-fieldElement" value="Отправить"
+                                                 action="#{queryBean.checkAction}" />
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h:panelGroup layout="block" class="history page-block" rendered="#{not empty historyBean.queries}">
+            <h:dataTable styleClass="history-table" var="query" value="#{historyBean.queries}">
+                <h:column>
+                    <f:facet name="header">X</f:facet>
+
+                    <h:outputText value="#{query.x}">
+                        <f:convertNumber maxFractionDigits="10" />
+                    </h:outputText>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Y</f:facet>
+
+                    <h:outputText value="#{query.y}">
+                        <f:convertNumber maxFractionDigits="10" />
+                    </h:outputText>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">R</f:facet>
+
+                    <h:outputText value="#{query.r}">
+                        <f:convertNumber maxFractionDigits="10" />
+                    </h:outputText>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Результат</f:facet>
+
+                    <h:outputText value="точка #{query.result ? '' : 'не'} попадает в область" />
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Время отправки</f:facet>
+
+                    <h:outputText value="#{query.created}">
+                        <f:convertDateTime locale="ru" type="both" timeStyle="full" timeZone="Europe/Moscow" />
+                    </h:outputText>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Время обработки</f:facet>
+
+                    <h:outputText value="#{query.elapsed}">
+                        <f:convertNumber maxFractionDigits="10" />
+                    </h:outputText>
+
+                    с
+                </h:column>
+            </h:dataTable>
+        </h:panelGroup>
+
+        <div class="page-block" style="text-align: center;">
+            <h:link value="Перейти на главную страницу" outcome="index" />
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        area.repaint();
+
+        document.body.onload = () => {
+            area.onRChanged(document.getElementById('userForm:rField_input').value);
+            area.setHistory(JSON.parse(document.getElementById('areaHistory').innerText));
+        };
+    </script>
+</h:body>
+</html>

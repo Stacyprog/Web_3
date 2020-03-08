@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<faces-config version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+    http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
+
+    <managed-bean>
+        <managed-bean-name>queryBean</managed-bean-name>
+        <managed-bean-class>lab3.web.QueryBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+
+        <managed-property>
+            <property-name>historyBean</property-name>
+            <value>#{historyBean}</value>
+        </managed-property>
+
+        <managed-property>
+            <property-name>request</property-name>
+            <value>#{request}</value>
+        </managed-property>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>historyBean</managed-bean-name>
+        <managed-bean-class>lab3.HistoryBean</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+
+        <managed-property>
+            <property-name>session</property-name>
+            <value>#{session.id}</value>
+        </managed-property>
+    </managed-bean>
+
+    <converter>
+        <converter-id>lab3.CommaDoubleConverter</converter-id>
+        <converter-class>lab3.web.CommaDoubleConverter</converter-class>
+    </converter>
+
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
+
+        <navigation-case>
+            <from-outcome>index</from-outcome>
+            <to-view-id>/index.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>main</from-outcome>
+            <to-view-id>/main.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+</faces-config>
